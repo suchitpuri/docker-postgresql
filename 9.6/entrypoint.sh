@@ -20,6 +20,22 @@ PG_ROTATE_BACKUP=${PG_ROTATE_BACKUP:-true}
 PG_CHECK=${PG_CHECK:-}
 PG_RESTORE=${PG_RESTORE:-}
 
+
+
+# set this environment variable to master, slave or snapshot to use replication features.
+# "snapshot" will create a point in time backup of a master instance.
+PG_MODE=${PG_MODE:-}
+
+#override when used in stateful sets
+# Try to guess the mode of the database from the hostname, if its a hostname-0 then use it as master for other hostname-x use it as slaves
+if [[ `hostname` =~ -([0-9]+)$ ]]; then
+  ordinal=${BASH_REMATCH[1]}
+  if [[ $ordinal -eq 0 ]]; then
+    PG_MODE = master
+  else
+    PG_MODE = slave
+  fi
+fi
 # set this env variable to true to enable a line in the
 # pg_hba.conf file to trust samenet.  this can be used to connect
 # from other containers on the same host without authentication
@@ -30,9 +46,6 @@ DB_USER=${DB_USER:-}
 DB_PASS=${DB_PASS:-}
 DB_UNACCENT=${DB_UNACCENT:false}
 
-# set this environment variable to master, slave or snapshot to use replication features.
-# "snapshot" will create a point in time backup of a master instance.
-PG_MODE=${PG_MODE:-}
 
 REPLICATION_USER=${REPLICATION_USER:-replica}
 REPLICATION_PASS=${REPLICATION_PASS:-replica}
